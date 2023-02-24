@@ -14,44 +14,9 @@ const AddToCart = ({ product, selectedId, onClick, __quantity }) => {
     updateQuantity(__quantity);
   }, [__quantity]);
 
-  const hasRecurrence = () => {
-    return (
-      product?.prices?.map(price => price?.recurring !== null)?.indexOf(true) >
-      -1
-    );
-  };
-
   const addToCart = async () => {
     const tempCart = [...cart];
     let itemFound = false;
-
-    // product is recurring, must immediately check out
-    if (hasRecurrence()) {
-      setLoading(true);
-
-      const stripe = await getStripe();
-      const payload = [
-        {
-          price: product?.prices?.filter(price => price?.id === selectedId)?.[0]
-            ?.id,
-          quantity: parseInt(quantity),
-        },
-      ];
-
-      const { recurringError } = await stripe.redirectToCheckout({
-        mode: 'subscription',
-        lineItems: payload,
-        successUrl: `${window.location.origin}/cart?checkout=success`,
-        cancelUrl: `${window.location.origin}/cart`,
-      });
-
-      if (recurringError) {
-        console.warn('Error:', recurringError);
-        setLoading(false);
-      }
-
-      return;
-    }
 
     tempCart.forEach(el => {
       el.prices &&
@@ -91,7 +56,7 @@ const AddToCart = ({ product, selectedId, onClick, __quantity }) => {
           if (onClick) onClick();
         }}
       >
-        {hasRecurrence() ? <>Buy Now</> : <>Add to Cart</>}
+        <>Add to Cart</>
       </button>
     </>
   );
