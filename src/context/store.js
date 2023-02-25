@@ -20,6 +20,10 @@ const StoreProvider = ({ children }) => {
             currency
             unit_amount
             nickname
+            # recurring {
+            #   interval
+            #   interval_count
+            # }
             product {
               id
               name
@@ -28,8 +32,8 @@ const StoreProvider = ({ children }) => {
                 # @TODO: call out explicit key enums in README
                 # gender
                 # color
+
                 featured
-                hidequantity
                 category
               }
               localFiles {

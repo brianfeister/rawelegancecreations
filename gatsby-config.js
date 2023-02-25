@@ -3,15 +3,10 @@ require('dotenv').config({
 });
 
 module.exports = {
-  // fixes build timeouts as seen here
-  // https://app.netlify.com/sites/ninagroop/deploys/61069faf422fca6e41ac7160
-  // flags: {
-  //   FAST_DEV: true,
-  // },
   siteMetadata: {
-    title: `Nina Groop`,
-    description: `Life Coach, Author, Speaker`,
-    author: `Nina Groop`,
+    title: `Raw Elegance Creations`,
+    description: `Hand-crafted Organic Wearables`,
+    author: `Danielle Chanlder`,
     nav: [
       {
         title: 'Home',
@@ -141,7 +136,7 @@ module.exports = {
         `,
         feeds: [
           {
-            title: 'Nina Groop Blog Feed',
+            title: 'Raw Elegance Creations Blog Feed',
             serialize: ({ query: { site, allMarkdownRemark } }) => {
               return allMarkdownRemark.nodes.map(node => {
                 return Object.assign({}, node.frontmatter, {

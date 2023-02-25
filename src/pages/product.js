@@ -50,8 +50,8 @@ const Product = ({ location }) => {
             <h1>{item.name}</h1>
             {item?.metadata?.category === 'coaching' && (
               <>
-                (Text from Nina about encouraging folks to sign up for a free
-                consult)
+                (Text from Danielle about encouraging folks to sign up for a
+                free consult)
                 <br />
                 [[ link to calend.ly ]]
               </>

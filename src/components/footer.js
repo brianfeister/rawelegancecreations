@@ -224,7 +224,7 @@ const Footer = ({
       <div className="article-body">
         <div className="footer-grid">
           <div>
-            <h5>About Nina</h5>
+            <h5>About Danielle</h5>
             <p>{footerBioText}</p>
             <img src={getSrc(footerImage)} />
 
@@ -255,7 +255,7 @@ const Footer = ({
               })}
             </div>
             <div>
-              <h5>Meet Nina</h5>
+              <h5>Meet Danielle</h5>
               {footerMeetText}
               <CalendlyButton>Schedule Now</CalendlyButton>
               <br />

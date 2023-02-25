@@ -110,7 +110,7 @@ collections:
           required: false,
         }
       - {
-          label: 'About Nina Footer Bio Text',
+          label: 'About Danielle Footer Bio Text',
           name: 'footerbiotext',
           widget: 'markdown',
         }
@@ -121,7 +121,7 @@ collections:
           - { label: 'Link Name', name: 'title', widget: 'string' }
           - { label: 'URL', name: 'url', widget: 'string' }
       - {
-          label: 'Meet Nina Footer Text',
+          label: 'Meet Danielle Footer Text',
           name: 'footermeettext',
           widget: 'markdown',
         }
