@@ -8,8 +8,6 @@ navigation:
     slug: /blog
   - title: About
     slug: /about
-  - title: Coaching
-    slug: /coaching
   - title: Contact
     slug: /contact
   - title: Store
@@ -20,28 +18,28 @@ navigation:
 tagline: Insight. Resilience. Hope.
 homequote: With our beliefs, hopes, and dreams, we write the story of our lives.
   Are you ready for your next chapter?
-featuredimage: shifaaz-shamoon-okvxy9tg3ky-unsplash.jpg
-footerbioimage: nina-bio.jpg
-footerbiotext: Danielle has the soul of an artist and has pursued art as a way of life. Santa Fe fits her well.
+featuredimage: mala-sage-peacock-bg.jpg
+footerbioimage: danielle-bio.jpg
+footerbiotext: Danielle has the soul of an artist and has pursued art as a way
+  of life. Santa Fe fits her well.
 sociallinks:
   - title: Instagram
     url: http://instagram.com/rawelegancecreations
   - title: Facebook
     url: http://facebook.com/rawelegancecreations
-footermeettext: Schedule a free, no-obligation introductory session to learn how
-  we can work together to turn the page and help you write your next chapter.
+footermeettext: Schedule a free consultation with Danielle today to bring to
+  life your personalized jewelry dreams
 footercredits:
-  - text: 'Photo credit: Juniper Studios Photography'
-    linktext: '@juniperstudiosphotography '
+  - text: "Photo credit: Juniper Studios Photography"
+    linktext: "@juniperstudiosphotography "
     url: http://instragram.com/juniperstudiosphotography
-  - linktext: '@laura_nicole_robinson'
-    text: 'Photo credit: Laura Robinson'
+  - linktext: "@laura_nicole_robinson"
+    text: "Photo credit: Laura Robinson"
     url: http://instragram.com/laura_nicole_robinson
 ---
-
 ## You have the power to write a new future.
 
-![](stoolb-w.jpg '#position=relative;float=right;width=50%;margin=0 0 20px 20px;')
+![](danielle-bio.jpg)
 
 Every day you get to write the story of your life. But sometimes unexpected events come along and disrupt the narrative; other times you can forget that new chapters are possible.
 
