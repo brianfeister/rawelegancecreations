@@ -30,9 +30,9 @@ export const MainBody = styled.div`
     will-change: transform;
     background: linear-gradient(
         180deg,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.35) 60%,
-        rgba(255, 255, 255, 0.35) 100%
+        rgba(209, 209, 209, 0.5) 0%,
+        rgba(209, 209, 209, 0.75) 60%,
+        rgba(209, 209, 209, 0.85) 100%
       ),
       url('${props => `${props.featuredImage}`}') no-repeat top center;
     background-size: cover;
