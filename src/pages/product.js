@@ -48,14 +48,6 @@ const Product = ({ location }) => {
           </section>
           <section className="product-info">
             <h1>{item.name}</h1>
-            {item?.metadata?.category === 'coaching' && (
-              <>
-                (Text from Danielle about encouraging folks to sign up for a
-                free consult)
-                <br />
-                [[ link to calend.ly ]]
-              </>
-            )}
             <br />
             <br />
             <p>{item.description}</p>

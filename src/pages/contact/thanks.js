@@ -12,8 +12,7 @@ const Thanks = ({ location }) => {
       <h1 className="main-heading">Thanks!</h1>
 
       <div className="article-body">
-        Thanks for reaching out, I'll get back to you soon! &larr; Insert Bio
-        Photo &rarr;
+        Thanks for connecting, I'll get back to you as soon as I can!
       </div>
     </Layout>
   );
