@@ -32,7 +32,6 @@ const StoreProvider = ({ children }) => {
                 # @TODO: call out explicit key enums in README
                 # gender
                 # color
-
                 featured
                 category
               }

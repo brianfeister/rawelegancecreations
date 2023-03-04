@@ -3,12 +3,8 @@ import { navigate } from 'gatsby-link';
 import Layout from '../../components/layout';
 import Bio from '../../components/bio';
 import Seo from '../../components/seo';
-
-function encode(data) {
-  return Object.keys(data)
-    .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
-    .join('&');
-}
+import { encode } from '../../utils';
+import jsonp from 'jsonp';
 
 const Contact = ({ location }) => {
   const [formState, setFormState] = useState({ isValidated: false });

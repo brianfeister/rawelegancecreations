@@ -2219,10 +2219,10 @@
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
 
-"@stripe/stripe-js@^1.11.0":
-  version "1.42.1"
-  resolved "https://registry.yarnpkg.com/@stripe/stripe-js/-/stripe-js-1.42.1.tgz#09f303fe298f81e5dc618f0df88bf929d758fa0f"
-  integrity sha512-5H7P7rVNDMdiJCUKsKXRUyr6IjZ4/9f8FB62NCa5O4rDftRfs4u2dPjjHs/tIs4OLeBB6oSzJIkE7cPr4ykPHg==
+"@stripe/stripe-js@^1.48.0":
+  version "1.48.0"
+  resolved "https://registry.yarnpkg.com/@stripe/stripe-js/-/stripe-js-1.48.0.tgz#53d07ebc32da03ee3d76eb6aebf4447c160807fd"
+  integrity sha512-Kw2BRXk6z/wnTU9m2IJOhxJNrx9xzmpFSbk6D/Z0x6LJntMafiHeHFag2PvSF30O2quMb1UUdWsnZqGVDruZww==
 
 "@swc/helpers@^0.4.2":
   version "0.4.12"

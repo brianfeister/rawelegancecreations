@@ -4,6 +4,9 @@ import { StaticImage, getSrc, getImage } from 'gatsby-plugin-image';
 import CalendlyButton from './calendlyButton';
 import SkeletonProfile from './skeletonProfile';
 import Modal from 'react-modal';
+import { encode } from '../utils';
+import { navigate } from 'gatsby-link';
+import jsonp from 'jsonp';
 
 const customModalStyles = {
   content: {
@@ -99,46 +102,105 @@ const StyledSignupBox = styled.div`
   }
 `;
 
-export const SignupFormWithFallback = () => {
-  const [iframeLoading, toggleIframeLoaded] = useState('LOADING');
-  const onIframeLoaded = () => {
-    toggleIframeLoaded('LOADED');
+/**
+ * Build a query string of MC list fields
+ *
+ * @param {Object} fields - a list of mailchimp audience field labels
+ *  and their values. We uppercase because that's what MC requires.
+ *  NOTE: GROUPS stay as lowercase (ex: MC uses group field names as `group[21269]`)
+ *
+ * @return {String} - `&FIELD1=value1&FIELD2=value2&group[21265][2]=group1`
+ */
+const convertListFields = fields => {
+  let queryParams = '';
+  for (const field in fields) {
+    if (Object.prototype.hasOwnProperty.call(fields, field)) {
+      // If this is a list group, not user field then keep lowercase, as per MC reqs
+      // https://github.com/benjaminhoffman/gatsby-plugin-mailchimp/blob/master/README.md#groups
+      const fieldTransformed =
+        field.substring(0, 6) === 'group[' ? field : field.toUpperCase();
+      queryParams = queryParams.concat(`&${fieldTransformed}=${fields[field]}`);
+    }
+  }
+  return queryParams;
+};
+
+const subscribeToMailchimp = async (email, fields) => {
+  const queryParams = `&EMAIL=${encodeURIComponent(email)}${convertListFields(
+    fields
+  )}`;
+  const url = `https://app.us11.list-manage.com/subscribe/post-json?u=5723136ae72f80537ccc2fe4d&amp;id=903c1b9f75&amp;f_id=00c99ce0f0${queryParams}`;
+
+  return new Promise((resolve, reject) =>
+    jsonp(url, { timeout: 3500 }, (err, data) => {
+      if (err) reject(err);
+      if (data) resolve(data);
+    })
+  );
+};
+
+export const MailChimpSignup = () => {
+  const [formState, setFormState] = useState({ isValidated: false });
+  const [formError, setFormError] = useState({});
+  const [formSuccess, setFormSuccess] = useState({});
+  const handleChange = e =>
+    setFormState({ ...formState, [e.target.name]: e.target.value });
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+
+    try {
+      const res = await subscribeToMailchimp(formState?.email, {
+        fname: formState?.name,
+      });
+      setFormSuccess(`Check your inbox for details`);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
-    <>
-      {iframeLoading === 'LOADING' && <SkeletonProfile />}
-      {/*
-      iframe onLoaded callback was setting FAILED erroneously, ignore for now
-      {iframeLoading === 'FAILED' && (
-        <a
-          class="primary fit"
-          target="_blank"
-          href="https://ninagroop.substack.com/subscribe?utm_source=ninagroop.com&simple=true&next=https%3A%2F%2Fninagroop.substack.com%2Farchive"
-        >
-          Sign Up
-        </a>
-      )} */}
-      {iframeLoading !== 'LOADING' && (
-        <iframe
-          src="https://ninagroop.substack.com/embed"
-          width="320"
-          height="290"
-          frameBorder="0"
-          scrolling="no"
-        />
-      )}
-      <iframe
-        id="iframe-ref"
-        style={{ display: 'none' }}
-        src="https://ninagroop.substack.com/embed"
-        width="320"
-        height="290"
-        frameBorder="0"
-        scrolling="no"
-        onLoad={onIframeLoaded}
-      />
-    </>
+    <div className="inline-signup">
+      <form method="post" onSubmit={handleSubmit}>
+        <div className="field">
+          <label className="label" htmlFor={'name'}>
+            Your name
+          </label>
+          <div className="control">
+            <input
+              className="input"
+              type={'text'}
+              name={'name'}
+              onChange={handleChange}
+              id={'name'}
+              required={true}
+            />
+          </div>
+        </div>
+        <div className="field">
+          <label className="label" htmlFor={'email'}>
+            Email
+          </label>
+          <div className="control">
+            <input
+              className="input"
+              type={'email'}
+              name={'email'}
+              onChange={handleChange}
+              id={'email'}
+              required={true}
+            />
+          </div>
+        </div>
+        <br />
+        <br />
+        <div className="field">
+          <button className="button is-link" type="submit">
+            Sign Up
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 
@@ -146,7 +208,7 @@ export const SignupBox = () => {
   const [modalIsOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const cookieKey = 'ninaGroopMarketingModalViewed';
+    const cookieKey = 'rawEleganceMarketingModalViewed';
     if (document?.cookie?.match(cookieKey + '=true')) {
       return;
     }
@@ -154,7 +216,9 @@ export const SignupBox = () => {
     expires.setSeconds(expires.getSeconds() + 10368000);
     const cookieToSet = `${cookieKey}=true;expires=${expires.toUTCString()};`;
     document.cookie = cookieToSet;
-    setIsOpen(true);
+    setTimeout(() => {
+      setIsOpen(true);
+    }, 5000);
   }, []);
 
   const openModal = () => {
@@ -167,9 +231,7 @@ export const SignupBox = () => {
 
   return (
     <StyledSignupBox>
-      <div class="inline-signup">
-        <SignupFormWithFallback />
-      </div>
+      <MailChimpSignup />
 
       <Modal
         isOpen={modalIsOpen}
@@ -181,19 +243,11 @@ export const SignupBox = () => {
 
         <div class="modal-wrap-inner">
           <p class="modal-intro-text">
-            If you'd like to hear from me in your inbox or you'd like to receive
-            insight into your character strengths, sign up below. I'd love to
-            send you my newsletter and some free resources that will empower
-            you.{' '}
-            <a
-              class="primary fit"
-              target="_blank"
-              href="https://ninagroop.substack.com/subscribe?utm_source=ninagroop.com&simple=true&next=https%3A%2F%2Fninagroop.substack.com%2Farchive"
-            >
-              Sign Up
-            </a>
+            If you'd like to <strong>receive 10% off</strong> your first order,
+            and hear about our newest lovingly hand-crafted organic wearable
+            expressions, we will email you a promo code.{' '}
           </p>
-          <SignupFormWithFallback />
+          <MailChimpSignup />
           <a
             target="_blank"
             href=""

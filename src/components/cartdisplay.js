@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import getStripe from '../utils/stripejs';
 import { Link } from 'gatsby';
 import { formatPrice } from '../helpers/currency-filter';
@@ -56,8 +56,17 @@ const getMappedCart = ({ cart }) => {
   let mappedCart = [];
   cart.forEach(item => {
     item.prices.forEach(price => {
-      if (price.quantity > 0) {
-        mappedCart.push({ price: price.id, quantity: price.quantity });
+      if (price.quantity > 0 && price.active) {
+        mappedCart.push({
+          unit_amount: price.unit_amount,
+          price_id: price.id,
+          quantity: price.quantity,
+          description: item.description,
+          images: item.images,
+          name: `${item.name}${
+            price?.nickname ? ' (' + price.nickname + ')' : ''
+          }`,
+        });
       }
     });
   });
@@ -66,7 +75,11 @@ const getMappedCart = ({ cart }) => {
 
 const CartDisplay = () => {
   const [cart, updateCart] = useContext(CartContext);
-  const [loading, setLoading] = useState(false); // eslint-disable-line no-unused-vars
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 
   const removeFromCart = id => {
     // in stripe's products API, we have prod_ for products
@@ -91,15 +104,17 @@ const CartDisplay = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
-
     setLoading(true);
-
+    const response = await fetch('/.netlify/functions/create-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(getMappedCart({ cart })),
+    }).then(res => res.json());
     const stripe = await getStripe();
     const { error } = await stripe.redirectToCheckout({
-      mode: 'payment',
-      lineItems: getMappedCart({ cart }),
-      successUrl: `${window.location.origin}/checkout?checkout=success`,
-      cancelUrl: `${window.location.origin}/checkout`,
+      sessionId: response.sessionId,
     });
 
     if (error) {
@@ -239,9 +254,49 @@ const CartDisplay = () => {
         <div></div>
         <div className="checkout">
           {getSubtotalOfAllVariants({ cart }) > 0 && (
-            <form onSubmit={handleSubmit}>
-              <button className="pay-with-stripe checkout" type="submit">
-                Checkout
+            <form
+              onSubmit={handleSubmit}
+              action="/.netlify/functions/create-checkout"
+              method="post"
+            >
+              <button
+                disabled={loading}
+                className="pay-with-stripe checkout"
+                type="submit"
+              >
+                {!loading ? (
+                  'Checkout'
+                ) : (
+                  <svg
+                    width="4rem"
+                    height="4rem"
+                    style={{ marginTop: '-0.5rem' }}
+                    version="1.1"
+                    id="L9"
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                    x="0px"
+                    y="0px"
+                    viewBox="0 0 100 100"
+                    enable-background="new 0 0 0 0"
+                    xmlSpace="preserve"
+                  >
+                    <path
+                      fill="#000"
+                      d="M73,50c0-12.7-10.3-23-23-23S27,37.3,27,50 M30.9,50c0-10.5,8.5-19.1,19.1-19.1S69.1,39.5,69.1,50"
+                    >
+                      <animateTransform
+                        attributeName="transform"
+                        attributeType="XML"
+                        type="rotate"
+                        dur="1s"
+                        from="0 50 50"
+                        to="360 50 50"
+                        repeatCount="indefinite"
+                      />
+                    </path>
+                  </svg>
+                )}
               </button>
             </form>
           )}

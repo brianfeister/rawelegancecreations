@@ -18,7 +18,7 @@ navigation:
 tagline: Insight. Resilience. Hope.
 homequote: With our beliefs, hopes, and dreams, we write the story of our lives.
   Are you ready for your next chapter?
-featuredimage: shifaaz-shamoon-okvxy9tg3ky-unsplash.jpg
+featuredimage: mala-sage-peacock-bg.jpg
 footerbioimage: danielle-bio.jpg
 footerbiotext: Danielle has the soul of an artist and has pursued art as a way of life. Santa Fe fits her well.
 sociallinks:
@@ -39,7 +39,7 @@ footercredits:
 
 ## You have the power to write a new future.
 
-![](daniell-bio.jpg '#position=relative;float=right;width=50%;margin=0 0 20px 20px;')
+![](danielle-bio.jpg '#position=relative;float=right;width=50%;margin=0 0 20px 20px;')
 
 Every day you get to write the story of your life. But sometimes unexpected events come along and disrupt the narrative; other times you can forget that new chapters are possible.
 
