@@ -163,7 +163,7 @@ exports.handler = async event => {
     });
   } catch (err) {
     console.log(
-      `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} ERR: failed to create session: ${err} at ${new Date.now()}`
+      `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} ERR: failed to create session: ${err}`
     );
     return {
       statusCode: 500,

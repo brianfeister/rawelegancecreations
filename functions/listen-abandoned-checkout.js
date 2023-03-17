@@ -1,16 +1,3 @@
-// server.js
-//
-// Use this sample code to handle webhook events in your integration.
-//
-// 1) Paste this code into a new file (server.js)
-//
-// 2) Install dependencies
-//   npm install stripe
-//   npm install express
-//
-// 3) Run the server on http://localhost:4242
-//   node server.js
-
 const stripe = require('stripe')(process.env.GATSBY_STRIPE_SECRET_KEY, {
   apiVersion: '2022-11-15',
   maxNetworkRetries: 2,
@@ -27,6 +14,9 @@ exports.handler = async event => {
       process.env.STRIPE_ABANDONED_CHECKOUT_WEBHOOK_SECRET
     );
   } catch (err) {
+    console.log(
+      `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} ERR: failed to create stripe abandoned cart event: ${err}`
+    );
     return {
       statusCode: 400,
       body: JSON.stringify({
@@ -47,7 +37,11 @@ exports.handler = async event => {
     default:
       console.log(`Unhandled stripeEvent type ${stripeEvent.type}`);
   }
-
+  console.log(
+    `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} SUCCESS: created stripe abandoned cart event: ${err} ${JSON.stringify(
+      stripeEvent.data.object
+    )}}`
+  );
   return {
     statusCode: 200,
     body: JSON.stringify(stripeEvent.data.object),
