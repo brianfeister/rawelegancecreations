@@ -32,11 +32,11 @@ exports.handler = async event => {
       // update, so a new customer could wind up with 2 accounts
       // seems an acceptable trade-off now while total customers
       // are low and reconciliation of dupes can happen manually
-      const customerSearch = await stripe.customers.search({
-        query: `email:'${body.email}'`,
+      const customerList = await stripe.customers.list({
+        email: body.email,
       });
-      if (customerSearch?.data?.[0]) {
-        customer = customerSearch?.data?.[0];
+      if (customerList?.data?.[0]) {
+        customer = customerList?.data?.[0];
       } else {
         isNewCustomer = true;
         customer = await stripe.customers.create({
@@ -162,7 +162,9 @@ exports.handler = async event => {
       // },
     });
   } catch (err) {
-    console.log(`ERR: failed to create session: ${err}`);
+    console.log(
+      `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} ERR: failed to create session: ${err} at ${new Date.now()}`
+    );
     return {
       statusCode: 500,
       body: JSON.stringify({
@@ -170,7 +172,11 @@ exports.handler = async event => {
       }),
     };
   }
-  console.log(`created new session id: ${session.id}`);
+  console.log(
+    `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} SUCESS: created new session id: ${
+      session.id
+    }`
+  );
   return {
     statusCode: 200,
     body: JSON.stringify({
