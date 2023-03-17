@@ -54,10 +54,6 @@ export const Payment = styled.section`
     text-align: right;
   }
 
-  .pay-with-stripe {
-    float: right;
-  }
-
   // TODO: add styles here to fix cart
 
   @media screen and (min-width: 700px) {
@@ -75,9 +71,13 @@ export const Payment = styled.section`
     width: 90%;
   }
 
-  .checkout button {
-    width: 100%;
-    margin-bottom: 2rem;
-    margin-right: 1rem;
+  .checkout {
+    margin-right: 2rem;
+    button,
+    input label {
+      width: 100%;
+      margin-bottom: 2rem;
+      margin-right: 1rem;
+    }
   }
 `;

@@ -4,7 +4,7 @@
  */
 
 import { graphql, useStaticQuery } from 'gatsby';
-import 'normalize.css';
+// import 'normalize.css';
 import PropTypes from 'prop-types';
 import React from 'react';
 import '../sass/main.scss';

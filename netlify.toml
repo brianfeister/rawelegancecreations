@@ -26,3 +26,7 @@
   STRIPE_SECRET_KEY = "Add your Stripe secret key here: sk_test_xxx"
   STRIPE_WEBHOOK_SECRET = "Add your Stripe webhook secret for local testing of Stripe purchase webhooks for rebuild: whsec_xxx"
   NETLIFY_WEBHOOK_ID = "Add your Netlify webhook id for auto deploys on Stripe product updates: xxx"
+
+# TODO: update when migrating to node16 serverless functions
+# [functions]
+#  node_bundler = "esbuild"

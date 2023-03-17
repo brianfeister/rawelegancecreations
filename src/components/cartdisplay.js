@@ -104,13 +104,18 @@ const CartDisplay = () => {
 
   const handleSubmit = async event => {
     event.preventDefault();
+    const form = new FormData(event.target);
     setLoading(true);
     const response = await fetch('/.netlify/functions/create-checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(getMappedCart({ cart })),
+      body: JSON.stringify({
+        cart: getMappedCart({ cart }),
+        consent: !!form.get('consent'),
+        email: form.get('email'),
+      }),
     }).then(res => res.json());
     const stripe = await getStripe();
     const { error } = await stripe.redirectToCheckout({
@@ -252,6 +257,7 @@ const CartDisplay = () => {
           </div>
         </div>
         <div></div>
+
         <div className="checkout">
           {getSubtotalOfAllVariants({ cart }) > 0 && (
             <form
@@ -259,6 +265,31 @@ const CartDisplay = () => {
               action="/.netlify/functions/create-checkout"
               method="post"
             >
+              <div className="field">
+                <label className="label" htmlFor={'email'}>
+                  Email
+                </label>
+                <div className="control">
+                  <input
+                    className="input"
+                    type={'email'}
+                    name={'email'}
+                    id={'email'}
+                  />
+                </div>
+              </div>
+              <div>
+                <input
+                  className="input"
+                  type={'checkbox'}
+                  name={'consent'}
+                  id={'consent'}
+                />
+                <label className="label" htmlFor={'consent'}>
+                  As a new customer, please give me an auto discount at checkout
+                  and send me future promos via email
+                </label>
+              </div>
               <button
                 disabled={loading}
                 className="pay-with-stripe checkout"
