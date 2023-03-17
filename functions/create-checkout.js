@@ -118,13 +118,7 @@ exports.handler = async event => {
             after_expiration: {
               recovery: {
                 enabled: true,
-                allow_promotion_code: true,
-
-                // disabled in favor of hardcoded `RECVIP10`
-                // ... but is there a chance of race condition
-                // with new promo creation?
-
-                // allow_promotion_codes: true,
+                allow_promotion_codes: true,
               },
             },
           }
