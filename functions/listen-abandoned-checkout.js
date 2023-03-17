@@ -23,7 +23,6 @@ exports.handler = async event => {
         error: `Webhook Error: ${err.message}`,
       }),
     };
-    return;
   }
 
   console.log('~stripeEvent', stripeEvent);
@@ -38,7 +37,7 @@ exports.handler = async event => {
       console.log(`Unhandled stripeEvent type ${stripeEvent.type}`);
   }
   console.log(
-    `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} SUCCESS: created stripe abandoned cart event: ${err} ${JSON.stringify(
+    `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} SUCCESS: created stripe abandoned cart event: ${JSON.stringify(
       stripeEvent.data.object
     )}}`
   );
