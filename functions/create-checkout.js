@@ -118,7 +118,6 @@ exports.handler = async event => {
             after_expiration: {
               recovery: {
                 enabled: true,
-                allow_promotion_codes: true,
               },
             },
           }
@@ -163,6 +162,7 @@ exports.handler = async event => {
       // },
     });
   } catch (err) {
+    console.log(`ERR: failed to create session: ${err}`);
     return {
       statusCode: 500,
       body: JSON.stringify({
@@ -170,7 +170,7 @@ exports.handler = async event => {
       }),
     };
   }
-
+  console.log(`created new session id: ${session.id}`);
   return {
     statusCode: 200,
     body: JSON.stringify({
