@@ -2,6 +2,7 @@ const stripe = require('stripe')(process.env.GATSBY_STRIPE_SECRET_KEY, {
   apiVersion: '2022-11-15',
   maxNetworkRetries: 2,
 });
+const fetch = require('node-fetch');
 const { logAndReturnError } = require('./utils');
 
 const MAIL_API_ENDPOINT = 'https://api.mailerlite.com/api/v2/subscribers';
