@@ -15,7 +15,7 @@ const stripe = require('stripe')(process.env.GATSBY_STRIPE_SECRET_KEY, {
   maxNetworkRetries: 2,
 });
 
-const logAndReturnError = require('../utils').logAndReturnError;
+const { logAndReturnError } = require('./utils');
 
 exports.handler = async event => {
   let session;
