@@ -15,6 +15,8 @@ const stripe = require('stripe')(process.env.GATSBY_STRIPE_SECRET_KEY, {
   maxNetworkRetries: 2,
 });
 
+const logAndReturnError = require('../utils').logAndReturnError;
+
 exports.handler = async event => {
   let session;
   try {
@@ -27,7 +29,7 @@ exports.handler = async event => {
       // this is questionable in terms of API optimization
       // on one hand, we don't want to have another database
       // and API, on the other, Stripe allows many `customers`
-      // with the same email address. Their docs also caveat
+      //  the samwithe email address. Their docs also caveat
       // that this search API can take up to 60s ~ hours to
       // update, so a new customer could wind up with 2 accounts
       // seems an acceptable trade-off now while total customers
@@ -38,11 +40,20 @@ exports.handler = async event => {
       if (customerList?.data?.[0]) {
         customer = customerList?.data?.[0];
       } else {
-        isNewCustomer = true;
-        customer = await stripe.customers.create({
-          email: body.email,
-          metadata: { promotional_consent: 'yes' },
-        });
+        try {
+          isNewCustomer = true;
+          // NOTE: stripe will ultimately call `listen-customer-created`
+          // async and handle the signup to mailing list
+          customer = await stripe.customers.create({
+            email: body.email,
+            metadata: { promotional_consent: 'yes' },
+          });
+        } catch (err) {
+          return logAndReturnError(
+            `ERR: failed to create stripe customer`,
+            err
+          );
+        }
       }
     }
 
@@ -162,18 +173,10 @@ exports.handler = async event => {
       // },
     });
   } catch (err) {
-    console.log(
-      `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} ERR: failed to create session: ${err}`
-    );
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: err,
-      }),
-    };
+    return logAndReturnError(`ERR: failed to create session`, err);
   }
   console.log(
-    `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} SUCESS: created new session id: ${
+    `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} SUCCESS: created new session id: ${
       session.id
     }`
   );

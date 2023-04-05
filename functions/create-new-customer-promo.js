@@ -13,7 +13,7 @@ exports.handler = async event => {
     const body = JSON.parse(event.body);
     promotionCode = await stripe.promotionCodes.create({
       // correlates to `First time buyer - RECVIP10` in Stripe
-      // https://dashboard.stripe.com/test/coupons/ruRd45BT
+      // https://dashboard.stripe.com/test/coupons/VWcZtSOZ
       coupon: 'VWcZtSOZ',
       code: 'RECVIP10',
       // limits the code redemption to only the specified custoemer
