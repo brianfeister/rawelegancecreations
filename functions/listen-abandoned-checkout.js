@@ -32,18 +32,16 @@ exports.handler = async event => {
   switch (stripeEvent.type) {
     case 'checkout.session.expired':
       try {
-        sessionLineItems = await new Promise((resolve, reject) => {
-          stripe.checkout.sessions.listLineItems(
-            stripeEvent.data.object.id,
-            { limit: 1 },
-            (err, lineItems) => {
-              if (err) {
-                return reject(err);
-              }
-              resolve(lineItems);
+        sessionLineItems = await stripe.checkout.sessions.listLineItems(
+          stripeEvent.data.object.id,
+          { limit: 1 },
+          (err, lineItems) => {
+            if (err) {
+              return reject(err);
             }
-          );
-        });
+            resolve(lineItems);
+          }
+        );
       } catch (err) {
         logError(`ERR: Could not retrieve stripe checkout session`, err);
         // return logAndReturnError(`ERR: Could not retrieve stripe checkout session`, err, 400);
