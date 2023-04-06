@@ -31,6 +31,7 @@ exports.handler = async event => {
   let sessionLineItems;
   switch (stripeEvent.type) {
     case 'checkout.session.expired':
+      console.log('~stripe.checkout.sessions', stripe.checkout.sessions);
       try {
         sessionLineItems = await stripe.checkout.sessions.listLineItems(
           stripeEvent.data.object.id,
