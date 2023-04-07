@@ -31,18 +31,27 @@ exports.handler = async event => {
   let sessionLineItems;
   switch (stripeEvent.type) {
     case 'checkout.session.expired':
-      console.log('~stripe.checkout.sessions', stripe.checkout.sessions);
       try {
-        sessionLineItems = await stripe.checkout.sessions.listLineItems(
-          stripeEvent.data.object.id,
-          { limit: 1 },
-          (err, lineItems) => {
-            if (err) {
-              return reject(err);
+        console.log(typeof stripe);
+        console.log(stripe.VERSION);
+        console.log(typeof stripe.checkout);
+        console.log(Object.keys(stripe.checkout));
+        console.log(typeof stripe.checkout.sessions);
+        console.log(typeof stripe.checkout.sessions.listLineItems);
+        console.log(stripe.checkout.sessions.__proto__);
+
+        sessionLineItems = await new Promise((resolve, reject) => {
+          stripe.checkout.sessions.listLineItems(
+            stripeEvent.data.object.id,
+            { limit: 1 },
+            (err, lineItems) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve(lineItems);
             }
-            resolve(lineItems);
-          }
-        );
+          );
+        });
       } catch (err) {
         logError(`ERR: Could not retrieve stripe checkout session`, err);
         // return logAndReturnError(`ERR: Could not retrieve stripe checkout session`, err, 400);
