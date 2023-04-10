@@ -5,7 +5,7 @@ const stripe = require('stripe')(process.env.GATSBY_STRIPE_SECRET_KEY, {
 const fetch = require('node-fetch');
 const { logAndReturnError, logError } = require('./utils');
 
-const MAIL_API_ENDPOINT = 'https://api.mailerlite.com/api/v2/subscribers';
+const MAIL_API_ENDPOINT = 'https://api.mailerlite.com/api/v2';
 const REC_SITE_PROMO_SUBSCRIBERS_ID = '82997463888168093';
 
 exports.handler = async event => {
@@ -44,14 +44,6 @@ exports.handler = async event => {
         };
       }
       try {
-        console.log(typeof stripe);
-        console.log(stripe.VERSION);
-        console.log(typeof stripe.checkout);
-        console.log(Object.keys(stripe.checkout));
-        console.log(typeof stripe.checkout.sessions);
-        console.log(typeof stripe.checkout.sessions.listLineItems);
-        console.log(stripe.checkout.sessions.__proto__);
-
         sessionLineItems = await new Promise((resolve, reject) => {
           stripe.checkout.sessions.listLineItems(
             stripeEvent.data.object.id,
@@ -68,11 +60,6 @@ exports.handler = async event => {
         logError(`ERR: Could not retrieve stripe checkout session`, err);
         // return logAndReturnError(`ERR: Could not retrieve stripe checkout session`, err, 400);
       }
-      console.log('~sessionLineItems', sessionLineItems);
-      console.log(
-        '~sessionLineItems?.data?.[0]?.price',
-        sessionLineItems?.data?.[0]?.price
-      );
       let productFetchCall;
       if (!sessionLineItems?.data?.[0]?.price?.product) {
         logError(`ERR: Could not retrieve stripe product info`, err);
@@ -85,13 +72,12 @@ exports.handler = async event => {
           return logAndReturnError(`ERR: Mailerlite signup error`, err, 400);
         }
       }
-      console.log('~productFetchCall?.images', productFetchCall?.images);
 
       try {
         // this simply makes a patch request to add the user's name if it was
         // provided in the abandoned checkout session
         signupPatchResponse = await fetch(
-          `${MAIL_API_ENDPOINT}/${checkoutSessionExpired?.customer_details?.email}`,
+          `${MAIL_API_ENDPOINT}/subscribers/${checkoutSessionExpired?.customer_details?.email}`,
           {
             headers: new fetch.Headers({
               'Content-Type': 'application/json',
@@ -116,10 +102,11 @@ exports.handler = async event => {
       } catch (err) {
         return logAndReturnError(`ERR: Mailerlite signup error`, err, 400);
       }
+      console.log('~signupPatchResponse', signupPatchResponse);
       let addToGroupResponse;
       try {
         addToGroupResponse = await fetch(
-          `https://api.mailerlite.com/api/v2/groups/${REC_SITE_PROMO_SUBSCRIBERS_ID}/subscribers`,
+          `${MAIL_API_ENDPOINT}/groups/${REC_SITE_PROMO_SUBSCRIBERS_ID}/subscribers`,
           {
             headers: new fetch.Headers({
               'Content-Type': 'application/json',
@@ -144,6 +131,7 @@ exports.handler = async event => {
           400
         );
       }
+      console.log('~addToGroupResponse', addToGroupResponse);
       break;
     // ... handle other stripeEvent types
     default:
