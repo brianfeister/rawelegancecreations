@@ -31,6 +31,18 @@ exports.handler = async event => {
   let sessionLineItems;
   switch (stripeEvent.type) {
     case 'checkout.session.expired':
+      const checkoutSessionExpired = stripeEvent.data.object;
+      if (!checkoutSessionExpired?.customer_details?.email) {
+        logError(
+          `INFO: session did not include email address, cannot send to mailing list`
+        );
+        return {
+          statusCode: 200,
+          body: JSON.stringify({
+            message: `INFO: session did not include email address, cannot send to mailing list`,
+          }),
+        };
+      }
       try {
         console.log(typeof stripe);
         console.log(stripe.VERSION);
@@ -74,7 +86,7 @@ exports.handler = async event => {
         }
       }
       console.log('~productFetchCall?.images', productFetchCall?.images);
-      const checkoutSessionExpired = stripeEvent.data.object;
+
       try {
         // this simply makes a patch request to add the user's name if it was
         // provided in the abandoned checkout session
@@ -93,10 +105,10 @@ exports.handler = async event => {
               // ref: https://developers-classic.mailerlite.com/reference/create-a-subscriber
               fields: {
                 // TODO: finish this and make conditional + get data from the right place
-                abandoned_cart_product_name: sessionLineItems?.data?.[0]?.name,
-                abandoned_cart_product_img:
-                  sessionLineItems?.data?.[0]?.images?.[0],
-                abandoned_checkout_link: sessionLineItems?.data?.[0]?.link,
+                abandoned_cart_product_name: productFetchCall?.name,
+                abandoned_cart_product_img: productFetchCall?.images?.[0],
+                abandoned_checkout_link:
+                  checkoutSessionExpired?.after_expiration?.recovery?.url,
               },
             }),
           }
