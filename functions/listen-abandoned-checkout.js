@@ -57,6 +57,7 @@ exports.handler = async event => {
         // return logAndReturnError(`ERR: Could not retrieve stripe checkout session`, err, 400);
       }
       console.log('~sessionLineItems', sessionLineItems);
+      let checkoutSessionExpired;
       try {
         const checkoutSessionExpired = stripeEvent.data.object;
 
