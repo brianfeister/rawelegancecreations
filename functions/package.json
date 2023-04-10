@@ -2,11 +2,6 @@
   "name": "functions",
   "version": "0.0.1",
   "main": "index.js",
-  "author": "Brian Feister <brian.feister@gmail.com>",
-  "license": "MIT",
-  "dependencies": {
-    "@sendgrid/mail": "^7.0.0",
-    "node-fetch": "^2.6.9",
-    "stripe": "^11.17.0"
-  }
+  "author": "Brian Feister",
+  "license": "MIT"
 }
