@@ -28,5 +28,5 @@
   NETLIFY_WEBHOOK_ID = "Add your Netlify webhook id for auto deploys on Stripe product updates: xxx"
 
 # TODO: update when migrating to node16 serverless functions
-# [functions]
-#  node_bundler = "esbuild"
+[functions]
+  node_bundler = "esbuild"
