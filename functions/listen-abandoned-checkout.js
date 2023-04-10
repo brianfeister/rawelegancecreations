@@ -61,10 +61,21 @@ exports.handler = async event => {
         '~sessionLineItems?.data?.[0]?.price',
         sessionLineItems?.data?.[0]?.price
       );
-      let checkoutSessionExpired;
+      let productFetchCall;
+      if (!sessionLineItems?.data?.[0]?.price?.product) {
+        logError(`ERR: Could not retrieve stripe product info`, err);
+      } else {
+        try {
+          productFetchCall = await stripe.products.retrieve(
+            sessionLineItems?.data?.[0]?.price?.product
+          );
+        } catch (err) {
+          return logAndReturnError(`ERR: Mailerlite signup error`, err, 400);
+        }
+      }
+      console.log('~productFetchCall?.images', productFetchCall?.images);
+      const checkoutSessionExpired = stripeEvent.data.object;
       try {
-        checkoutSessionExpired = stripeEvent.data.object;
-
         // this simply makes a patch request to add the user's name if it was
         // provided in the abandoned checkout session
         signupPatchResponse = await fetch(
