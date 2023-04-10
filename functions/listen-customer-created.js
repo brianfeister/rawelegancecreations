@@ -40,7 +40,7 @@ exports.handler = async event => {
         // this really should just be a flow that says
         // "send an email - 'hey did you still want to buy this?' "
         await fetch(MAIL_API_ENDPOINT, {
-          headers: new Headers({
+          headers: new fetch.Headers({
             'Content-Type': 'application/json',
             Accept: 'application/json',
             'X-MailerLite-ApiKey': process.env.MAILERLITE_SECRET,

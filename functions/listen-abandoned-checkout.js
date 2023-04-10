@@ -65,7 +65,7 @@ exports.handler = async event => {
         signupPatchResponse = await fetch(
           `${MAIL_API_ENDPOINT}/${checkoutSessionExpired?.customer_details?.email}`,
           {
-            headers: new Headers({
+            headers: new fetch.Headers({
               'Content-Type': 'application/json',
               Accept: 'application/json',
               'X-MailerLite-ApiKey': process.env.MAILERLITE_SECRET,
@@ -93,7 +93,7 @@ exports.handler = async event => {
         addToGroupResponse = await fetch(
           `https://api.mailerlite.com/api/v2/groups/${REC_SITE_PROMO_SUBSCRIBERS_ID}/subscribers`,
           {
-            headers: new Headers({
+            headers: new fetch.Headers({
               'Content-Type': 'application/json',
               Accept: 'application/json',
               'X-MailerLite-ApiKey': process.env.MAILERLITE_SECRET,
