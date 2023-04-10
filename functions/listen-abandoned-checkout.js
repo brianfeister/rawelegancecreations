@@ -76,6 +76,19 @@ exports.handler = async event => {
       try {
         // this simply makes a patch request to add the user's name if it was
         // provided in the abandoned checkout session
+        const signupPatchPayload = JSON.stringify({
+          name: checkoutSessionExpired?.customer_details?.name,
+          type: 'active', // could be 'unconfirmed' for double opt-in
+          // ref: https://developers-classic.mailerlite.com/reference/create-a-subscriber
+          fields: {
+            // TODO: finish this and make conditional + get data from the right place
+            abandoned_cart_product_name: productFetchCall?.name,
+            abandoned_cart_product_img: productFetchCall?.images?.[0],
+            abandoned_checkout_link:
+              checkoutSessionExpired?.after_expiration?.recovery?.url,
+          },
+        });
+        console.log('~signupPatchPayload', signupPatchPayload);
         signupPatchResponse = await fetch(
           `${MAIL_API_ENDPOINT}/subscribers/${checkoutSessionExpired?.customer_details?.email}`,
           {
@@ -85,18 +98,7 @@ exports.handler = async event => {
               'X-MailerLite-ApiKey': process.env.MAILERLITE_SECRET,
             }),
             method: 'PUT',
-            body: JSON.stringify({
-              name: checkoutSessionExpired?.customer_details?.name,
-              type: 'active', // could be 'unconfirmed' for double opt-in
-              // ref: https://developers-classic.mailerlite.com/reference/create-a-subscriber
-              fields: {
-                // TODO: finish this and make conditional + get data from the right place
-                abandoned_cart_product_name: productFetchCall?.name,
-                abandoned_cart_product_img: productFetchCall?.images?.[0],
-                abandoned_checkout_link:
-                  checkoutSessionExpired?.after_expiration?.recovery?.url,
-              },
-            }),
+            body: signupPatchPayload,
           }
         );
       } catch (err) {
@@ -105,6 +107,15 @@ exports.handler = async event => {
       console.log('~signupPatchResponse', signupPatchResponse);
       let addToGroupResponse;
       try {
+        const signupPayload = JSON.stringify({
+          data: {
+            email: checkoutSessionExpired?.customer_details?.email,
+            resubscribe: false,
+            autoresponders: true,
+            type: 'active',
+          },
+        });
+        console.log('~signupPayload', signupPayload);
         addToGroupResponse = await fetch(
           `${MAIL_API_ENDPOINT}/groups/${REC_SITE_PROMO_SUBSCRIBERS_ID}/subscribers`,
           {
@@ -114,14 +125,7 @@ exports.handler = async event => {
               'X-MailerLite-ApiKey': process.env.MAILERLITE_SECRET,
             }),
             method: 'POST',
-            body: JSON.stringify({
-              data: {
-                email: checkoutSessionExpired?.customer_details?.email,
-                resubscribe: false,
-                autoresponders: true,
-                type: 'active',
-              },
-            }),
+            body: signupPayload,
           }
         );
       } catch (err) {
