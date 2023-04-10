@@ -57,9 +57,13 @@ exports.handler = async event => {
         // return logAndReturnError(`ERR: Could not retrieve stripe checkout session`, err, 400);
       }
       console.log('~sessionLineItems', sessionLineItems);
+      console.log(
+        '~sessionLineItems?.data?.[0]?.price',
+        sessionLineItems?.data?.[0]?.price
+      );
       let checkoutSessionExpired;
       try {
-        const checkoutSessionExpired = stripeEvent.data.object;
+        checkoutSessionExpired = stripeEvent.data.object;
 
         // this simply makes a patch request to add the user's name if it was
         // provided in the abandoned checkout session
