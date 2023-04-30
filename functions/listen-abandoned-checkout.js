@@ -3,10 +3,7 @@ const stripe = require('stripe')(process.env.GATSBY_STRIPE_SECRET_KEY, {
   maxNetworkRetries: 2,
 });
 const fetch = require('node-fetch');
-const { logAndReturnError, logError } = require('./utils');
-
-const MAIL_API_ENDPOINT = 'https://api.mailerlite.com/api/v2';
-const REC_SITE_PROMO_SUBSCRIBERS_ID = '82997463888168093';
+const { logAndReturnError, logError, config } = require('./utils');
 
 exports.handler = async event => {
   const sig = event.headers['stripe-signature'];
@@ -73,11 +70,14 @@ exports.handler = async event => {
         }
       }
 
+      // in `create-checkout` we handle the initial subscribing of the user (since
+      // some will complete checkout without abandoning) we assume that user is
+      // already in the system here and
       try {
-        // this simply makes a patch request to add the user's name if it was
-        // provided in the abandoned checkout session
         const signupPatchPayload = JSON.stringify({
-          name: checkoutSessionExpired?.customer_details?.name,
+          ...(checkoutSessionExpired?.customer_details?.name
+            ? { name: checkoutSessionExpired?.customer_details?.name }
+            : {}),
           type: 'active', // could be 'unconfirmed' for double opt-in
           // ref: https://developers-classic.mailerlite.com/reference/create-a-subscriber
           fields: {
@@ -89,8 +89,18 @@ exports.handler = async event => {
           },
         });
         console.log('~signupPatchPayload', signupPatchPayload);
+        // it should be impossible to trigger this without a customer email,
+        // but short circuit just in case
+        if (!checkoutSessionExpired?.customer_details?.email) {
+          return {
+            statusCode: 200,
+            body: JSON.stringify({
+              message: 'exiting flow early, no email address provided',
+            }),
+          };
+        }
         signupPatchResponse = await fetch(
-          `${MAIL_API_ENDPOINT}/subscribers/${checkoutSessionExpired?.customer_details?.email}`,
+          `${config.MAIL_API_ENDPOINT}/subscribers/${checkoutSessionExpired?.customer_details?.email}`,
           {
             headers: new fetch.Headers({
               'Content-Type': 'application/json',
@@ -105,6 +115,8 @@ exports.handler = async event => {
         return logAndReturnError(`ERR: Mailerlite signup error`, err, 400);
       }
       console.log('~signupPatchResponse', signupPatchResponse);
+      // the user is now signed up in the mailing list, add them to the group
+      // to trigger the abandoned cart automation flow
       let addToGroupResponse;
       try {
         const signupPayload = JSON.stringify({
@@ -117,7 +129,7 @@ exports.handler = async event => {
         });
         console.log('~signupPayload', signupPayload);
         addToGroupResponse = await fetch(
-          `${MAIL_API_ENDPOINT}/groups/${REC_SITE_PROMO_SUBSCRIBERS_ID}/subscribers`,
+          `${config.MAIL_API_ENDPOINT}/groups/${config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID}/subscribers`,
           {
             headers: new fetch.Headers({
               'Content-Type': 'application/json',
