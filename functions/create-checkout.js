@@ -19,10 +19,10 @@ const { logAndReturnError, logError, config } = require('./utils');
 
 exports.handler = async event => {
   let session;
+  let isOptInNewCustomer;
   try {
     const body = JSON.parse(event.body);
     let customer;
-    let isOptInNewCustomer;
     // TODO: verify that no customer is created (only a guest session)
     // if body.consent is unchecked
     if (body.email && body.consent) {
