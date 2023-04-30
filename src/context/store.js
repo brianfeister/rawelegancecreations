@@ -28,6 +28,7 @@ const StoreProvider = ({ children }) => {
               id
               name
               description
+              active
               metadata {
                 # @TODO: call out explicit key enums in README
                 # gender
@@ -59,11 +60,11 @@ const StoreProvider = ({ children }) => {
   const products = {};
   for (const { node: price } of data.prices.edges) {
     const product = price.product;
-    if (!products[product.id]) {
+    if (!products[product.id] && product.active) {
       products[product.id] = Object.assign({}, product);
       products[product.id].prices = [];
     }
-    products[product.id].prices.push(Object.assign({}, price));
+    products[product.id]?.prices?.push?.(Object.assign({}, price));
   }
 
   useEffect(() => {

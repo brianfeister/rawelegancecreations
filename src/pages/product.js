@@ -33,7 +33,7 @@ const Product = ({ location }) => {
   if (!item?.id) {
     return (
       <Layout location={location}>
-        <h2>Item not found!</h2>
+        <h1 className="main-heading">Item not found!</h1>
       </Layout>
     );
   }
