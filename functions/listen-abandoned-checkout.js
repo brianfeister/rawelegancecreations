@@ -24,7 +24,7 @@ exports.handler = async event => {
   }
 
   // Handle the stripeEvent
-  let signupPatchResponse;
+  let signupPutResponse;
   let sessionLineItems;
   switch (stripeEvent.type) {
     case 'checkout.session.expired':
@@ -74,7 +74,7 @@ exports.handler = async event => {
       // some will complete checkout without abandoning) we assume that user is
       // already in the system here and
       try {
-        const signupPatchPayload = JSON.stringify({
+        const signupPutPayload = JSON.stringify({
           ...(checkoutSessionExpired?.customer_details?.name
             ? { name: checkoutSessionExpired?.customer_details?.name }
             : {}),
@@ -88,7 +88,7 @@ exports.handler = async event => {
               checkoutSessionExpired?.after_expiration?.recovery?.url,
           },
         });
-        console.log('~signupPatchPayload', signupPatchPayload);
+        console.log('~signupPutPayload', signupPutPayload);
         // it should be impossible to trigger this without a customer email,
         // but short circuit just in case
         if (!checkoutSessionExpired?.customer_details?.email) {
@@ -99,7 +99,7 @@ exports.handler = async event => {
             }),
           };
         }
-        signupPatchResponse = await fetch(
+        signupPutResponse = await fetch(
           `${config.MAIL_API_ENDPOINT}/subscribers/${checkoutSessionExpired?.customer_details?.email}`,
           {
             headers: new fetch.Headers({
@@ -108,13 +108,13 @@ exports.handler = async event => {
               'X-MailerLite-ApiKey': process.env.MAILERLITE_SECRET,
             }),
             method: 'PUT',
-            body: signupPatchPayload,
+            body: signupPutPayload,
           }
         );
       } catch (err) {
         return logAndReturnError(`ERR: Mailerlite signup error`, err, 400);
       }
-      console.log('~signupPatchResponse', signupPatchResponse);
+      console.log('~signupPutResponse', signupPutResponse);
       // the user is now signed up in the mailing list, add them to the group
       // to trigger the abandoned cart automation flow
       let addToGroupResponse;
