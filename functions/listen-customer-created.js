@@ -62,7 +62,7 @@ exports.handler = async event => {
       try {
         // trigger signup and add to the base config.MAIL_REC_SITE_VIP_SUBSCRIBERS_ID
         // mailing list
-        const signupPostRequest = mailerlite.subscribers.createOrUpdate({
+        signupResponse = mailerlite.subscribers.createOrUpdate({
           email: customerCreatedEvent.email,
           ...(customerCreatedEvent?.name
             ? {
@@ -81,7 +81,7 @@ exports.handler = async event => {
     default:
       log(`ERR: Unhandled stripeEvent type ${stripeEvent.type}`);
   }
-  log(`SUCCESS: created mailerlite: ${JSON.stringify(addToGroupResponse)}}`);
+  log(`SUCCESS: created mailerlite: ${JSON.stringify(signupResponse)}}`);
   return {
     statusCode: 200,
     body: JSON.stringify(stripeEvent.data.object),
