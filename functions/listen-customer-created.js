@@ -58,7 +58,7 @@ exports.handler = async event => {
           }),
         };
       }
-
+      console.log('~got to 61');
       try {
         // trigger signup and add to the base config.MAIL_REC_SITE_VIP_SUBSCRIBERS_ID
         // mailing list
@@ -76,6 +76,7 @@ exports.handler = async event => {
       } catch (err) {
         return logAndReturnError(`ERR: Mailerlite signup error`, err);
       }
+      console.log('~79 signupResponse', signupResponse);
       break;
     // ... handle other stripeEvent types
     default:
@@ -84,6 +85,6 @@ exports.handler = async event => {
   log(`SUCCESS: created mailerlite: ${JSON.stringify(signupResponse)}}`);
   return {
     statusCode: 200,
-    body: JSON.stringify(stripeEvent.data.object),
+    body: JSON.stringify(signupResponse),
   };
 };
