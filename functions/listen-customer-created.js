@@ -58,11 +58,10 @@ exports.handler = async event => {
           }),
         };
       }
-      console.log('~got to 61');
       try {
         // trigger signup and add to the base config.MAIL_REC_SITE_VIP_SUBSCRIBERS_ID
         // mailing list
-        signupResponse = mailerlite.subscribers.createOrUpdate({
+        signupResponse = await mailerlite.subscribers.createOrUpdate({
           email: customerCreatedEvent.email,
           ...(customerCreatedEvent?.name
             ? {
@@ -76,7 +75,6 @@ exports.handler = async event => {
       } catch (err) {
         return logAndReturnError(`ERR: Mailerlite signup error`, err);
       }
-      console.log('~79 signupResponse', signupResponse);
       break;
     // ... handle other stripeEvent types
     default:
