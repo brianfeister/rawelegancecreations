@@ -8,6 +8,7 @@
     "node": ">=16"
   },
   "dependencies": {
+    "@mailerlite/mailerlite-nodejs": "^1.0.1",
     "@material-ui/core": "^4.12.2",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/utils": "^4.11.2",

@@ -2,8 +2,12 @@ const stripe = require('stripe')(process.env.GATSBY_STRIPE_SECRET_KEY, {
   apiVersion: '2022-11-15',
   maxNetworkRetries: 2,
 });
-const fetch = require('node-fetch');
-const { logAndReturnError, logError, config } = require('./utils');
+const MailerLite = require('@mailerlite/mailerlite-nodejs').default;
+const mailerlite = new MailerLite({
+  api_key: process.env.MAILERLITE_SECRET,
+});
+
+const { logAndReturnError, log, config } = require('./utils');
 
 exports.handler = async event => {
   const sig = event.headers['stripe-signature'];
@@ -30,7 +34,7 @@ exports.handler = async event => {
     case 'checkout.session.expired':
       const checkoutSessionExpired = stripeEvent.data.object;
       if (!checkoutSessionExpired?.customer_details?.email) {
-        logError(
+        log(
           `INFO: session did not include email address, cannot send to mailing list`
         );
         return {
@@ -54,111 +58,97 @@ exports.handler = async event => {
           );
         });
       } catch (err) {
-        logError(`ERR: Could not retrieve stripe checkout session`, err);
+        log(`ERR: Could not retrieve stripe checkout session`, err);
         // return logAndReturnError(`ERR: Could not retrieve stripe checkout session`, err, 400);
       }
       let productFetchCall;
       if (!sessionLineItems?.data?.[0]?.price?.product) {
-        logError(`ERR: Could not retrieve stripe product info`, err);
+        log(`ERR: Could not retrieve stripe product info`, err);
       } else {
         try {
           productFetchCall = await stripe.products.retrieve(
             sessionLineItems?.data?.[0]?.price?.product
           );
         } catch (err) {
-          return logAndReturnError(`ERR: Mailerlite signup error`, err, 400);
+          return logAndReturnError(
+            `ERR: Stripe products lineItems fetch error`,
+            err,
+            400
+          );
         }
+      }
+
+      // it should be impossible to trigger this flow in the first place
+      // without a customer email, but short circuit here just in case
+      if (!checkoutSessionExpired?.customer_details?.email) {
+        return {
+          statusCode: 200,
+          body: JSON.stringify({
+            message: 'exiting flow early, no email address provided',
+          }),
+        };
       }
 
       // in `create-checkout` we handle the initial subscribing of the user (since
       // some will complete checkout without abandoning) we assume that user is
-      // already in the system here and
+      // already in the system here, but first we need to fetch user ID
+      let existingEmailUser;
       try {
-        const signupPutPayload = JSON.stringify({
-          ...(checkoutSessionExpired?.customer_details?.name
-            ? { name: checkoutSessionExpired?.customer_details?.name }
-            : {}),
-          type: 'active', // could be 'unconfirmed' for double opt-in
-          // ref: https://developers-classic.mailerlite.com/reference/create-a-subscriber
-          fields: {
-            // TODO: finish this and make conditional + get data from the right place
-            abandoned_cart_product_name: productFetchCall?.name,
-            abandoned_cart_product_img: productFetchCall?.images?.[0],
-            abandoned_checkout_link:
-              checkoutSessionExpired?.after_expiration?.recovery?.url,
-          },
-        });
-        console.log('~signupPutPayload', signupPutPayload);
-        // it should be impossible to trigger this without a customer email,
-        // but short circuit just in case
-        if (!checkoutSessionExpired?.customer_details?.email) {
-          return {
-            statusCode: 200,
-            body: JSON.stringify({
-              message: 'exiting flow early, no email address provided',
-            }),
-          };
-        }
-        signupPutResponse = await fetch(
-          `${config.MAIL_API_ENDPOINT}/subscribers/${checkoutSessionExpired?.customer_details?.email}`,
-          {
-            headers: new fetch.Headers({
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-              'X-MailerLite-ApiKey': process.env.MAILERLITE_SECRET,
-            }),
-            method: 'PUT',
-            body: signupPutPayload,
-          }
+        existingEmailUser = await mailerlite.subscribers.get(
+          checkoutSessionExpired?.customer_details?.email
         );
+      } catch (err) {
+        return logAndReturnError(`ERR: Mailerlite can't fetch`, err, 400);
+      }
+
+      // TODO: if existingEmailUser spread (...) `group: []` in mailerlite.subscribers.createOrUpdate()
+      // otherwise just declare value of config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
+      const updateMailUserResponse = mailerlite.subscribers.createOrUpdate({
+        ...(checkoutSessionExpired?.customer_details?.name ||
+        existingEmailUser?.data?.name
+          ? {
+              name:
+                checkoutSessionExpired?.customer_details?.name ||
+                existingEmailUser?.data?.name,
+            }
+          : {}),
+        type: 'active', // could be 'unconfirmed' for double opt-in
+        groups: [
+          ...(existingEmailUser?.data?.groups?.length
+            ? // the user has already signed up, preserve existing
+              // group subscriptions and add them to to
+              // config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
+              // to trigger the abandoned cart automation flow
+              [
+                ...existingEmailUser?.data?.groups,
+                config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID,
+              ]
+            : [config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID]),
+        ],
+        // these are used by the mailing list automation
+        fields: {
+          abandoned_cart_product_name: productFetchCall?.name,
+          abandoned_cart_product_img: productFetchCall?.images?.[0],
+          abandoned_checkout_link:
+            checkoutSessionExpired?.after_expiration?.recovery?.url,
+        },
+      });
+
+      try {
+        console.log('~signupPutPayload', signupPutPayload);
+        signupPutResponse = mailerlite.subscribers.createOrUpdate({
+          email: checkoutSessionExpired?.customer_details?.email,
+        });
       } catch (err) {
         return logAndReturnError(`ERR: Mailerlite signup error`, err, 400);
       }
-      console.log('~signupPutResponse', signupPutResponse);
-      // the user is now signed up in the mailing list, add them to the group
-      // to trigger the abandoned cart automation flow
-      let addToGroupResponse;
-      try {
-        const signupPayload = JSON.stringify({
-          data: {
-            email: checkoutSessionExpired?.customer_details?.email,
-            resubscribe: false,
-            autoresponders: true,
-            type: 'active',
-          },
-        });
-        console.log('~signupPayload', signupPayload);
-        addToGroupResponse = await fetch(
-          `${config.MAIL_API_ENDPOINT}/groups/${config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID}/subscribers`,
-          {
-            headers: new fetch.Headers({
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-              'X-MailerLite-ApiKey': process.env.MAILERLITE_SECRET,
-            }),
-            method: 'POST',
-            body: signupPayload,
-          }
-        );
-      } catch (err) {
-        return logAndReturnError(
-          `ERR: Mailerlite add subscriber to group error:`,
-          err,
-          400
-        );
-      }
-      console.log('~addToGroupResponse', addToGroupResponse);
       break;
     // ... handle other stripeEvent types
     default:
-      console.log(
-        `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} Unhandled stripeEvent type ${
-          stripeEvent.type
-        }`
-      );
+      log(`ERR: Unhandled stripeEvent type ${stripeEvent.type}`);
   }
-  console.log(
-    `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} SUCCESS: created stripe abandoned cart event: ${JSON.stringify(
+  log(
+    `SUCCESS: created stripe abandoned cart event: ${JSON.stringify(
       stripeEvent.data.object
     )}}`
   );

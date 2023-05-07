@@ -1,6 +1,6 @@
 module.exports = {
   config: {
-    MAIL_API_ENDPOINT: 'https://api.mailerlite.com/api/v2',
+    MAIL_API_ENDPOINT: 'https://connect.mailerlite.com/api',
     MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID: '82997463888168093',
     MAIL_REC_SITE_VIP_SUBSCRIBERS_ID: '86900136808023392',
   },
@@ -15,7 +15,7 @@ module.exports = {
       }),
     };
   },
-  logError: (message, err) => {
+  log: (message, err) => {
     console.log(
       `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} ${message}: ${err}`
     );

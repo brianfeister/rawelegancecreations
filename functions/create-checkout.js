@@ -1,6 +1,5 @@
 // TODO: update to node16 and latest netlify cli
-const fetch = require('node-fetch');
-
+// const fetch = require('node-fetch');
 /*
  * This function creates a Stripe Checkout session and returns the session ID
  * for use with Stripe.js (specifically the redirectToCheckout method).
@@ -15,7 +14,7 @@ const stripe = require('stripe')(process.env.GATSBY_STRIPE_SECRET_KEY, {
   maxNetworkRetries: 2,
 });
 
-const { logAndReturnError, logError, config } = require('./utils');
+const { logAndReturnError, log, config } = require('./utils');
 
 exports.handler = async event => {
   let session;
@@ -175,77 +174,11 @@ exports.handler = async event => {
   } catch (err) {
     return logAndReturnError(`ERR: failed to create session`, err);
   }
-  console.log(
+  log(
     `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()} SUCCESS: created new session id: ${
       session.id
     }`
   );
-  if (isOptInNewCustomer) {
-    // in `listen-abandoned-checkout` we handle a follow-up where we grab the expired
-    // cart items and push the sub
-    try {
-      const signupPostPayload = JSON.stringify({
-        email: body.email,
-        type: 'active', // could be 'unconfirmed' for double opt-in
-        // ref: https://developers-classic.mailerlite.com/reference/create-a-subscriber
-      });
-      console.log('~signupPostPayload', signupPostPayload);
-      signupPostResponse = await fetch(
-        `${config.MAIL_API_ENDPOINT}/subscribers`,
-        {
-          headers: new fetch.Headers({
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            'X-MailerLite-ApiKey': process.env.MAILERLITE_SECRET,
-          }),
-          method: 'POST',
-          body: signupPostPayload,
-        }
-      );
-    } catch (err) {
-      // don't return an error, just log it, because this flow is async
-      // (intentionally non-blocking for faster checkout session creation)
-      // and will have already returned
-      return logError(`ERR: Mailerlite signup error`, err, 400);
-    }
-
-    // the user is now signed up in the mailing list, add them to the group
-    // to trigger promotional follow-up email automation
-    let addToGroupResponse;
-    try {
-      const signupPayload = JSON.stringify({
-        data: {
-          email: body.email,
-          resubscribe: false,
-          autoresponders: true,
-          type: 'active',
-        },
-      });
-      console.log('~signupPayload', signupPayload);
-      addToGroupResponse = await fetch(
-        `${config.MAIL_API_ENDPOINT}/groups/${config.MAIL_REC_SITE_VIP_SUBSCRIBERS_ID}/subscribers`,
-        {
-          headers: new fetch.Headers({
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            'X-MailerLite-ApiKey': process.env.MAILERLITE_SECRET,
-          }),
-          method: 'POST',
-          body: signupPayload,
-        }
-      );
-    } catch (err) {
-      // don't return an error, just log it, because this flow is async
-      // (intentionally non-blocking for faster checkout session creation)
-      // and will have already returned
-      return logError(
-        `ERR: Mailerlite add subscriber to group error:`,
-        err,
-        400
-      );
-    }
-    console.log('~addToGroupResponse', addToGroupResponse);
-  }
   return {
     statusCode: 200,
     body: JSON.stringify({
