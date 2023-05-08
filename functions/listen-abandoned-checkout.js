@@ -101,40 +101,42 @@ exports.handler = async event => {
       } catch (err) {
         return logAndReturnError(`ERR: Mailerlite can't fetch`, err, 400);
       }
-      console.log('~104');
+      console.log('~104 existingEmailUser', existingEmailUser);
       // TODO: if existingEmailUser spread (...) `group: []` in mailerlite.subscribers.createOrUpdate()
       // otherwise just declare value of config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
+      const payload = {
+        ...(checkoutSessionExpired?.customer_details?.name ||
+        existingEmailUser?.data?.name
+          ? {
+              name:
+                checkoutSessionExpired?.customer_details?.name ||
+                existingEmailUser?.data?.name,
+            }
+          : {}),
+        type: 'active', // could be 'unconfirmed' for double opt-in
+        ...(existingEmailUser?.data?.groups?.length
+          ? // the user has already signed up, preserve existing
+            // group subscriptions and add them to to
+            // config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
+            // to trigger the abandoned cart automation flow
+            {
+              groups: [
+                ...existingEmailUser?.data?.groups,
+                config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID,
+              ],
+            }
+          : { groups: [config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID] }),
+        // these are used by the mailing list automation
+        fields: {
+          abandoned_cart_product_name: productFetchCall?.name,
+          abandoned_cart_product_img: productFetchCall?.images?.[0],
+          abandoned_checkout_link:
+            checkoutSessionExpired?.after_expiration?.recovery?.url,
+        },
+      };
+      console.log('~mailerlite payload', payload);
       const updateMailUserResponse = await mailerlite.subscribers.createOrUpdate(
-        {
-          ...(checkoutSessionExpired?.customer_details?.name ||
-          existingEmailUser?.data?.name
-            ? {
-                name:
-                  checkoutSessionExpired?.customer_details?.name ||
-                  existingEmailUser?.data?.name,
-              }
-            : {}),
-          type: 'active', // could be 'unconfirmed' for double opt-in
-          ...(existingEmailUser?.data?.groups?.length
-            ? // the user has already signed up, preserve existing
-              // group subscriptions and add them to to
-              // config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
-              // to trigger the abandoned cart automation flow
-              {
-                groups: [
-                  ...existingEmailUser?.data?.groups,
-                  config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID,
-                ],
-              }
-            : { groups: [config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID] }),
-          // these are used by the mailing list automation
-          fields: {
-            abandoned_cart_product_name: productFetchCall?.name,
-            abandoned_cart_product_img: productFetchCall?.images?.[0],
-            abandoned_checkout_link:
-              checkoutSessionExpired?.after_expiration?.recovery?.url,
-          },
-        }
+        payload
       );
       console.log('~139');
       try {
