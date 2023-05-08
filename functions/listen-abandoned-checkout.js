@@ -92,6 +92,7 @@ exports.handler = async event => {
       // in `create-checkout` we handle the initial subscribing of the user (since
       // some will complete checkout without abandoning) we assume that user is
       // already in the system here, but first we need to fetch user ID
+      console.log('~95');
       let existingEmailUser;
       try {
         existingEmailUser = await mailerlite.subscribers.get(
@@ -100,7 +101,7 @@ exports.handler = async event => {
       } catch (err) {
         return logAndReturnError(`ERR: Mailerlite can't fetch`, err, 400);
       }
-
+      console.log('~104');
       // TODO: if existingEmailUser spread (...) `group: []` in mailerlite.subscribers.createOrUpdate()
       // otherwise just declare value of config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
       const updateMailUserResponse = await mailerlite.subscribers.createOrUpdate(
@@ -135,7 +136,7 @@ exports.handler = async event => {
           },
         }
       );
-
+      console.log('~139');
       try {
         console.log('~signupPutPayload', signupPutPayload);
         signupPutResponse = await mailerlite.subscribers.createOrUpdate({
