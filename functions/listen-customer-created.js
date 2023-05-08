@@ -80,7 +80,7 @@ exports.handler = async event => {
     default:
       log(`ERR: Unhandled stripeEvent type ${stripeEvent.type}`);
   }
-  log(`SUCCESS: created mailerlite: ${JSON.stringify(signupResponse)}}`);
+  log(`SUCCESS: created mailerlite: ${signupResponse}}`);
   return {
     statusCode: 200,
     body: JSON.stringify(signupResponse),
