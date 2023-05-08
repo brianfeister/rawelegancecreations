@@ -85,6 +85,8 @@ exports.handler = async event => {
   );
   return {
     statusCode: 200,
-    body: JSON.stringify(signupResponse),
+    body: JSON.stringify({
+      message: `SUCCESS: created / updated mailerlite user with id: ${signupResponse?.data?.data?.id}`,
+    }),
   };
 };

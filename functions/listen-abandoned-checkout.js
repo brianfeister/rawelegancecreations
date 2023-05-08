@@ -105,6 +105,7 @@ exports.handler = async event => {
       // TODO: if existingEmailUser spread (...) `group: []` in mailerlite.subscribers.createOrUpdate()
       // otherwise just declare value of config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
       const payload = {
+        email: checkoutSessionExpired?.customer_details?.email,
         ...(checkoutSessionExpired?.customer_details?.name ||
         existingEmailUser?.data?.name
           ? {
