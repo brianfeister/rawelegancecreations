@@ -115,18 +115,18 @@ exports.handler = async event => {
               }
             : {}),
           type: 'active', // could be 'unconfirmed' for double opt-in
-          groups: [
-            ...(existingEmailUser?.data?.groups?.length
-              ? // the user has already signed up, preserve existing
-                // group subscriptions and add them to to
-                // config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
-                // to trigger the abandoned cart automation flow
-                [
+          ...(existingEmailUser?.data?.groups?.length
+            ? // the user has already signed up, preserve existing
+              // group subscriptions and add them to to
+              // config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
+              // to trigger the abandoned cart automation flow
+              {
+                groups: [
                   ...existingEmailUser?.data?.groups,
                   config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID,
-                ]
-              : [config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID]),
-          ],
+                ],
+              }
+            : { groups: [config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID] }),
           // these are used by the mailing list automation
           fields: {
             abandoned_cart_product_name: productFetchCall?.name,
