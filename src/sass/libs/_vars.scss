@@ -49,13 +49,13 @@ $font: (
   weight-bold: 600,
   weight-heading: 400,
   weight-heading-bold: 700,
-  kern-heading: 0.1em,
+  kern-heading: 0.1rem,
 );
 
 // Palette.
 $palette: (
   bg: #ffffff,
-  fg: #ce812a,
+  fg: #bc8313,
   fg-bold: #313131,
   fg-light: rgba(0, 0, 0, 0.35),
   body-text: rgb(58, 56, 52),
@@ -65,3 +65,6 @@ $palette: (
   border2-bg: rgba(0, 0, 0, 0.075),
   accent: #865b33,
 );
+
+$brandprimary: #bc8313;
+$brandsecondary: #03c1c1;

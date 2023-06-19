@@ -38,7 +38,12 @@ const useStyles = makeStyles({
   },
 });
 
-const SwipeableTemporaryDrawer = ({ siteTitle, nav, getTotalCount }) => {
+const SwipeableTemporaryDrawer = ({
+  siteTitle,
+  nav,
+  getTotalCount,
+  showToggle,
+}) => {
   const classes = useStyles();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -66,7 +71,7 @@ const SwipeableTemporaryDrawer = ({ siteTitle, nav, getTotalCount }) => {
           <Link key={item.slug} to={item.slug}>
             <ListItem button key={item.title}>
               <ListItemText>
-                {item.showCartIndicator && getTotalCount() > 0 ? (
+                {item.showcartindicator && getTotalCount() > 0 ? (
                   <CartTotal>{getTotalCount()}</CartTotal>
                 ) : null}
                 {item.title}
@@ -80,9 +85,12 @@ const SwipeableTemporaryDrawer = ({ siteTitle, nav, getTotalCount }) => {
 
   return (
     <div>
-      <Button className="hidden-desktop" onClick={toggleDrawer()}>
-        <MenuIcon />
-      </Button>
+      {showToggle && (
+        <Button className="hidden-desktop" onClick={toggleDrawer()}>
+          <MenuIcon />
+        </Button>
+      )}
+
       <SwipeableDrawer
         classes={{ paper: classes.paper }}
         anchor={'right'}
@@ -115,14 +123,15 @@ const HideAppBar = ({ siteTitle, nav, getTotalCount, location, ...rest }) => {
         <AppBar className={classes.appBar}>
           <Toolbar className={classes.toolbar}>
             <a href="/" className="brand navbar-heading">
-              {siteTitle}
+              {/* {siteTitle} */}
+              <img src={'/images/brand-logo.svg'} alt="Raw Elegance Logo" />
             </a>
             <div className="hidden-desktop">
               <Nav>
-                <ul>
+                <ul className="nav-menu">
                   {nav.map(item => (
                     <li key={item.slug}>
-                      {item.showCartIndicator && getTotalCount() > 0 ? (
+                      {item.showcartindicator && getTotalCount() > 0 ? (
                         <CartTotal>{getTotalCount()}</CartTotal>
                       ) : null}
                       <Link to={item.slug}>{item.title}</Link>
@@ -137,6 +146,7 @@ const HideAppBar = ({ siteTitle, nav, getTotalCount, location, ...rest }) => {
                 nav={nav}
                 getTotalCount={getTotalCount}
                 location={location}
+                showToggle={true}
               />
             </div>
           </Toolbar>
@@ -163,10 +173,12 @@ const Header = ({ siteTitle, siteDescription, description, nav, location }) => {
         getTotalCount={getTotalCount}
         location={location}
       />
-      <Head>
+      <Head className="article-body no-bg">
         {/* TODO: make show only for home page */}
-        <h1 className="brand brand-title">{siteTitle}</h1>
-        <h2 className="brand brand-subtitle">{siteDescription}</h2>
+        <div className="brand-wrap">
+          <h1 className="brand brand-title">{siteTitle}</h1>
+          <h2 className="brand brand-subtitle">{siteDescription}</h2>
+        </div>
       </Head>
     </>
   );

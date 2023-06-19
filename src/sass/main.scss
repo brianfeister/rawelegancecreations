@@ -70,8 +70,9 @@
 
 /*------------ Variables -----------*/
 
-$brandprimary: #d96528;
-$brandsecondary: #03c1c1;
+// $brandprimary: #d96528;
+// $brandprimary: #bc8313;
+// $brandsecondary: #03c1c1;
 
 /*------------  Global   -----------*/
 
@@ -422,4 +423,13 @@ input[type='range'].slider:focus::-ms-fill-upper {
   background: $brandprimary;
 }
 
-// blog styles
+// nav styles
+
+ul.nav-menu {
+  li a {
+    color: _palette(body-text);
+    &:hover {
+      color: $brandprimary;
+    }
+  }
+}

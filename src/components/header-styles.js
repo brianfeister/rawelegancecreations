@@ -4,7 +4,7 @@ export const Head = styled.header`
   display: flex;
   justify-content: center;
   flex-direction: column;
-  align-items: center;
+  align-items: left;
 
   @media screen and (max-width: 850px) {
     nav ul li {
@@ -33,9 +33,6 @@ export const Nav = styled.nav`
       font-size: 1.125rem;
       a {
         border-bottom: none;
-        &:hover {
-          color: #fff;
-        }
       }
     }
   }

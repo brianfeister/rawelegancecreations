@@ -175,7 +175,7 @@ module.exports = {
       resolve: `gatsby-plugin-google-fonts`,
       options: {
         fonts: [
-          `Liu Jian Mao Cao\:400`,
+          // `Liu Jian Mao Cao\:400`,
           `Montserrat\:200,400,600,200italic,400italic,600italic`,
           `Raleway\:200,400,700`,
         ],
