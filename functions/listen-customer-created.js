@@ -33,10 +33,6 @@ exports.handler = async event => {
   switch (stripeEvent.type) {
     case 'customer.created':
       const customerCreatedEvent = stripeEvent.data.object;
-      console.log(
-        '~customer.created customerCreatedEvent \n',
-        customerCreatedEvent
-      );
       if (!customerCreatedEvent?.email) {
         const msg =
           'exiting early, no email in stripe customer.created webhook event body';
