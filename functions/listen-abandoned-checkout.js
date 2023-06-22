@@ -141,10 +141,10 @@ exports.handler = async event => {
       );
       console.log('~139');
       try {
-        console.log('~signupPutPayload', signupPutPayload);
         signupPutResponse = await mailerlite.subscribers.createOrUpdate({
           email: checkoutSessionExpired?.customer_details?.email,
         });
+        console.log('~signupPutResponse', signupPutResponse);
       } catch (err) {
         return logAndReturnError(`ERR: Mailerlite signup error`, err, 400);
       }
