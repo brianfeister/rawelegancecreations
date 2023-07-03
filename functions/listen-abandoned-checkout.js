@@ -147,7 +147,7 @@ exports.handler = async event => {
       log(`ERR: Unhandled stripeEvent type ${stripeEvent.type}`);
   }
   log(
-    `SUCCESS: registered user for abandoned cart flow: ${JSON.stringify(
+    `SUCCESS: registered user for abandoned cart flow: ${util.inspect(
       updateMailUserResponse
     )}}`
   );
