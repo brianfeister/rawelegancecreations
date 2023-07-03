@@ -100,46 +100,44 @@ exports.handler = async event => {
       } catch (err) {
         return logAndReturnError(`ERR: Mailerlite can't fetch`, err, 400);
       }
-      // TODO: if existingEmailUser spread (...) `group: []` in mailerlite.subscribers.createOrUpdate()
-      // otherwise just declare value of config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
-      const payload = {
-        email: checkoutSessionExpired?.customer_details?.email,
-        ...(checkoutSessionExpired?.customer_details?.name ||
-        existingEmailUser?.data?.name
-          ? {
-              name:
-                checkoutSessionExpired?.customer_details?.name ||
-                existingEmailUser?.data?.name,
-            }
-          : {}),
-        type: 'active', // could be 'unconfirmed' for double opt-in
-        ...(existingEmailUser?.data?.groups?.length
-          ? // the user has already signed up, preserve existing
-            // group subscriptions and add them to to
-            // config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
-            // to trigger the abandoned cart automation flow
-            {
-              groups: [
-                ...existingEmailUser?.data?.groups,
-                config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID,
-              ],
-            }
-          : { groups: [config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID] }),
-        // these are used by the mailing list automation
-        fields: {
-          abandoned_cart_product_name: productFetchCall?.name,
-          abandoned_cart_product_img: productFetchCall?.images?.[0],
-          abandoned_checkout_link:
-            checkoutSessionExpired?.after_expiration?.recovery?.url,
-        },
-      };
-      const updateMailUserResponse = await mailerlite.subscribers.createOrUpdate(
-        payload
-      );
+      let updateMailUserResponse;
       try {
-        signupPutResponse = await mailerlite.subscribers.createOrUpdate({
+        const payload = {
           email: checkoutSessionExpired?.customer_details?.email,
-        });
+          ...(checkoutSessionExpired?.customer_details?.name ||
+          existingEmailUser?.data?.name
+            ? {
+                name:
+                  checkoutSessionExpired?.customer_details?.name ||
+                  existingEmailUser?.data?.name,
+              }
+            : {}),
+          type: 'active', // could be 'unconfirmed' for double opt-in
+          ...(existingEmailUser?.data?.groups?.length
+            ? // the user has already signed up, preserve existing
+              // group subscriptions and add them to to
+              // config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID
+              // to trigger the abandoned cart automation flow
+              {
+                groups: [
+                  ...existingEmailUser?.data?.groups,
+                  config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID,
+                ],
+              }
+            : { groups: [config.MAIL_REC_SITE_ABANDONED_SUBSCRIBERS_ID] }),
+          // these are used by the mailing list automation
+          fields: {
+            abandoned_cart_product_name: productFetchCall?.name,
+            abandoned_cart_product_img: productFetchCall?.images?.[0],
+            abandoned_cart_link:
+              checkoutSessionExpired?.after_expiration?.recovery?.url,
+            // tomorrow in UTC
+            abandoned_cart_date: new Date().toISOString().split('T')[0],
+          },
+        };
+        updateMailUserResponse = await mailerlite.subscribers.createOrUpdate(
+          payload
+        );
       } catch (err) {
         return logAndReturnError(`ERR: Mailerlite signup error`, err, 400);
       }
@@ -149,8 +147,8 @@ exports.handler = async event => {
       log(`ERR: Unhandled stripeEvent type ${stripeEvent.type}`);
   }
   log(
-    `SUCCESS: created stripe abandoned cart event: ${JSON.stringify(
-      stripeEvent.data.object
+    `SUCCESS: registered user for abandoned cart flow: ${JSON.stringify(
+      updateMailUserResponse
     )}}`
   );
   return {
