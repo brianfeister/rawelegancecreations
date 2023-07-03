@@ -149,7 +149,7 @@ exports.handler = async event => {
   }
   log(
     `SUCCESS: registered user for abandoned cart flow: ${util.inspect(
-      updateMailUserResponse
+      updateMailUserResponse?.data?.data
     )}}`
   );
   return {
