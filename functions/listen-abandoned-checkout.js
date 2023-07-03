@@ -30,6 +30,7 @@ exports.handler = async event => {
   // Handle the stripeEvent
   let signupPutResponse;
   let sessionLineItems;
+  let updateMailUserResponse;
   switch (stripeEvent.type) {
     case 'checkout.session.expired':
       const checkoutSessionExpired = stripeEvent.data.object;
@@ -100,7 +101,6 @@ exports.handler = async event => {
       } catch (err) {
         return logAndReturnError(`ERR: Mailerlite can't fetch`, err, 400);
       }
-      let updateMailUserResponse;
       try {
         const payload = {
           email: checkoutSessionExpired?.customer_details?.email,
